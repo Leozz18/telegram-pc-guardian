@@ -20,8 +20,12 @@ class Settings:
     stop_file: Path
 
     @classmethod
-    def from_env(cls, env: dict[str, str] | None = None) -> "Settings":
-        values = os.environ if env is None else env
+    def from_env(cls, env: dict[str, str] | None = None, dotenv_path: Path | None = None) -> "Settings":
+        if env is None:
+            values = dict(os.environ)
+            values.update(_read_dotenv(dotenv_path or Path.cwd() / ".env", os.environ))
+        else:
+            values = env
         token = values.get("TELEGRAM_BOT_TOKEN", "").strip()
         if not token or ":" not in token:
             raise ConfigurationError("TELEGRAM_BOT_TOKEN must be a BotFather token.")
@@ -61,3 +65,32 @@ def _path(values: dict[str, str], name: str, default: str) -> Path:
     if not raw:
         raise ConfigurationError(f"{name} must not be empty.")
     return Path(raw).expanduser()
+
+
+def _read_dotenv(path: Path, environ: object) -> dict[str, str]:
+    """Read simple KEY=VALUE entries without executing shell syntax or overriding env vars."""
+    if not path.is_file():
+        return {}
+    result: dict[str, str] = {}
+    try:
+        lines = path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise ConfigurationError(f"Unable to read dotenv file: {path}") from exc
+    existing = os.environ if environ is os.environ else environ
+    for line_number, line in enumerate(lines, 1):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if stripped.startswith("export "):
+            stripped = stripped[7:].lstrip()
+        if "=" not in stripped:
+            raise ConfigurationError(f"Invalid dotenv entry on line {line_number}.")
+        key, value = (part.strip() for part in stripped.split("=", 1))
+        if not key or not key.replace("_", "a").isalnum() or key[0].isdigit():
+            raise ConfigurationError(f"Invalid dotenv key on line {line_number}.")
+        if key in existing:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            value = value[1:-1]
+        result[key] = value
+    return result

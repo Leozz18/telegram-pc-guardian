@@ -13,7 +13,7 @@ pip install -e ".[test]"
 Copy-Item .env.example .env
 ```
 
-In BotFather crea il bot e inserisci il token in `TELEGRAM_BOT_TOKEN` (meglio come variabile d'ambiente Windows, non in un file committato). Imposta `TELEGRAM_ALLOWED_CHAT_ID` con il tuo Chat ID numerico. Il bot ignora ogni altro Chat ID. Per sicurezza, proteggi il file di audit e la cartella di configurazione con permessi Windows minimi.
+In BotFather crea il bot e inserisci il token in `TELEGRAM_BOT_TOKEN` nel file `.env` locale oppure, preferibilmente, come variabile d'ambiente Windows. Il programma carica automaticamente `.env` dalla directory corrente senza sovrascrivere variabili d'ambiente già presenti. Imposta `TELEGRAM_ALLOWED_CHAT_ID` con il tuo Chat ID numerico. Il bot ignora ogni altro Chat ID. Per sicurezza, proteggi il file `.env`, il file di audit e la cartella di configurazione con permessi Windows minimi: `.env` è ignorato da Git e non deve essere committato.
 
 Esegui `telegram-pc-guardian`. Il programma mostra una notifica di avvio e registra eventi strutturati in JSON Lines. Per avviarlo con Windows, usa una voce **Utilità di pianificazione** visibile e documentata, con l'account utente dedicato e il minor privilegio possibile; il progetto non installa persistenza nascosta.
 
