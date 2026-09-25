@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telegram-pc-guardian"
+version = "0.1.0"
+description = "Transparent, consent-based Windows desktop guardian controlled by one Telegram chat."
+requires-python = ">=3.11"
+dependencies = [
+  "Pillow>=10.0",
+  "pystray>=0.19",
+  "requests>=2.31",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0"]
+
+[project.scripts]
+telegram-pc-guardian = "guardian.app:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
